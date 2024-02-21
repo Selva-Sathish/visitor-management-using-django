@@ -1,0 +1,172 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+</head>
+<body>
+    
+    
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body p-4 mb-3">
+                        <form method="post" enctype="multipart/form-data" id="addemployee">
+                            {% csrf_token %}
+                            <h4 class="card-title">Basic Details</h4>
+                            <hr />
+                            <div class="row">
+                                <div class="col-sm-12 col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="text-end control-label col-form-label">Visitor Name</label>
+                                        <div>
+                                            {{ form.visitor_name }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="text-end control-label col-form-label">Mobile no</label>
+                                        <div>
+                                            {{ form.mobile_number }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="text-end control-label col-form-label">Place</label>
+                                        <div>
+                                            {{ form.place }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="text-end control-label col-form-label">Company Name / Organisation</label>
+                                        <div>
+                                            {{ form.company_name }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="text-end control-label col-form-label">Designation</label>
+                                        <div>
+                                            {{ form.designation }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="text-end control-label col-form-label">Person Whom they Want to Meet*</label>
+                                        <div>
+                                            {{ form.person_to_meet }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="text-end control-label col-form-label">Purpose of Visit*</label>
+                                        <div>
+                                            {{ form.purpose }}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 col-lg-6">
+                                    <div class="mb-3">
+                                        <!-- Video element to display webcam feed -->
+                                        <div style="position: relative; width: 100%; padding-top: 56.25%;">
+                                            <video id="videoFeed" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" autoplay></video>
+                                        </div>
+                                        <!-- Bootstrap-styled button for capturing photo -->
+                                        <button type="button" onclick="capturePhoto()" class="btn btn-primary">Capture Photo</button>
+                                        <!-- 'btn-primary' applies Bootstrap's primary button style -->
+                                    </div>
+                                </div> 
+                                <div class="col-sm-12 col-lg-6">
+                                    <!-- Placeholder to display captured image -->
+                                    <div class="mb-3">
+                                        <img id="capturedImage" src="" alt="Captured Image" class="img-fluid rounded" style="max-width: 100%; height: auto;">
+                                        <!-- 'img-fluid' class makes the image responsive -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-3 border-top">
+                                <div class="text-end">
+                                    <input type="hidden" name="photoData" id="photoData">
+                                    <button type="submit" class="btn btn-info rounded-pill px-4 waves-effect waves-light">Save</button>
+                                    
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+   
+    
+    <script>
+        function capturePhoto() {
+            const video = document.getElementById('videoFeed');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+    
+            // Draw the current frame from the video element onto the canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+            // Get the canvas image as a data URL (base64 encoded)
+            const imageData = canvas.toDataURL('image/jpeg'); // Change format if needed
+    
+            // Display the captured image in the placeholder area
+            const capturedImage = document.getElementById('capturedImage');
+            capturedImage.src = imageData;
+    
+            // Save the image data to a hidden input field for form submission
+            document.getElementById('photoData').value = imageData;
+        }
+    
+        // Call the function when the window is fully loaded
+        window.onload = function() {
+            const video = document.getElementById('videoFeed');
+    
+            if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(function (stream) {
+                        video.srcObject = stream;
+                        video.play(); // Start video playback
+                    })
+                    .catch(function (err) {
+                        console.error('Error accessing webcam:', err);
+                    });
+            } else {
+                console.error('Webcam access not supported');
+            }
+        };
+    </script>
+    
+</body>
+</html>
+
+{% endblock %}
